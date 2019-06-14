@@ -1,0 +1,848 @@
+
+///////////////////////////////////////////////////////
+//                                                   //
+//                                                   //
+//                                                   //
+//                  2017--05--28                     //
+//                                                   //
+//                                                   //
+//                                                   //
+///////////////////////////////////////////////////////
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+
+import java.io.*;
+import java.util.Vector;
+import java.awt.geom.*;
+import java.io.File;  
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+
+public class DrawPad extends JFrame implements ActionListener
+{    
+    		/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+	
+    final JFileChooser chooser = new JFileChooser(".");  
+   
+    JpgFileFilter jpgFilter = new JpgFileFilter();
+   
+
+   
+			JLabel label = new JLabel();	
+    		JLabel jl = new JLabel("  "),
+    		lcolor = new JLabel(" ■ ■ ■ ■ ■");
+    		JMenuBar mb = new JMenuBar(),mb2 = new JMenuBar();// Create the menu bar component
+    		JMenu mu = new JMenu("File(F)");// Create menu components
+    		JMenu qu = new JMenu("Color(C)");
+    		JMenu ru = new JMenu("Help(H)");
+    		JPopupMenu pmu = new JPopupMenu();//Create pop-up menu options
+    		JPanel jpanel1 = new JPanel(), jpanel2 = new JPanel(),
+    	           jpanel3 = new JPanel();
+    		
+    		DrawPanel jpanel4 = new DrawPanel();
+    		JButton
+    				btn3 = new JButton("Palette    ");
+
+    	   JRadioButton  
+    	   			jrb1 = new JRadioButton("Pencil      "),
+    				jrb2 = new JRadioButton("Rubber      "),
+    				jrb4 = new JRadioButton("Line        "),
+    				jrb5 = new JRadioButton("Rectangular "),
+    				jrb6= new  JRadioButton("Circular    "),
+    		        jrb7 = new JRadioButton("Elliptic    "),
+    		        jrb8 = new JRadioButton("Square      ");
+    		 JCheckBox
+    		        jck9 = new    JCheckBox("Filling     ");
+    		JSeparator seperate1=new JSeparator(),seperate2=new JSeparator();//Join the underline
+    		JMenuItem  openfile, save, saveas, exit, help, about,coloredit;
+    		Box box = Box.createVerticalBox();
+    		@SuppressWarnings("rawtypes")
+    		Vector point= null;//Point vector group
+    		Color color = new Color(0,0,0);
+    		boolean filled;
+    		boolean mouseDown=false ;
+    		Point mark = new Point(-1, -1, 15, color,filled);//Point truncation symbol
+    		Point sp = new Point(-1, -1, 15, color,filled);
+    		Point cp = new Point(-1, -1, 15, color,filled);
+    		int flag=4;//Determine the current tool and default to the line
+    		int x=-1,y=-1;//The coordinates of the current point
+    		int jlx=-1,jly=-1;
+    		int n=1;
+    @SuppressWarnings("rawtypes")
+	public DrawPad()
+    {	super();
+	openfile = new JMenuItem("Open(O)",KeyEvent.VK_O);
+	save = new JMenuItem("Save(S)",KeyEvent.VK_S);
+	saveas = new JMenuItem("Save as(D)",KeyEvent.VK_D);
+	exit = new JMenuItem("Exit(X)",KeyEvent.VK_F4);
+	coloredit = new JMenuItem("ColorEdit(E)",KeyEvent.VK_E);
+	help = new JMenuItem("Help(H)",KeyEvent.VK_H);
+	about = new JMenuItem("About(M)",KeyEvent.VK_M);
+
+	
+	// Add options to the menu bar
+	mb.add(mu);
+	mu.add(openfile);
+	mu.add(save);
+	mu.add(saveas);
+	mu.add(seperate1);// Join the line
+	mu.add(exit);
+	mb.add(qu);
+	qu.add(coloredit);
+	mb.add(ru);
+	ru.add(help);
+	ru.add(seperate2);
+	ru.add(about);
+	pmu.add("Producer:");
+	pmu.add("  Archer");
+	jpanel1.add(box);
+	box.add(jrb1);
+	box.add(new JSeparator());
+	box.add(jrb2);
+	box.add(new JSeparator());
+	box.add(btn3);
+	box.add(new JSeparator());
+	box.add(jrb4);
+	box.add(new JSeparator());
+	box.add(jrb5);
+	box.add(new JSeparator());
+	box.add(jrb6);
+	box.add(new JSeparator());
+	box.add(jrb7);
+	box.add(new JSeparator());
+	box.add(jrb8);
+	box.add(new JSeparator());
+	box.add(jck9);
+	box.add(lcolor);
+	ButtonGroup bg=new ButtonGroup();
+	bg.add(jrb1);
+	bg.add(jrb2);
+	bg.add(jrb4 );
+	bg.add(jrb5);
+	bg.add(jrb6);
+	bg.add(jrb7);
+	bg.add(jrb8);
+	
+	//p2.add(label);
+	//label.setBackground(Color.white);
+	
+	// set shortcut keys
+	mu.setMnemonic(KeyEvent.VK_F);
+	qu.setMnemonic(KeyEvent.VK_C);
+	ru.setMnemonic(KeyEvent.VK_H);
+	
+	exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4,ActionEvent.ALT_MASK));
+	openfile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
+	save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
+	saveas.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,ActionEvent.CTRL_MASK));
+	coloredit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,ActionEvent.CTRL_MASK));
+	help.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H,ActionEvent.CTRL_MASK));
+	about.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,ActionEvent.CTRL_MASK));
+	
+	// Add the monitor
+	openfile.addActionListener(this);
+	save.addActionListener(this);
+	saveas.addActionListener(this);
+	exit.addActionListener(this);
+	coloredit.addActionListener(this);
+	about.addActionListener(this);
+	help.addActionListener(this);
+	jrb1.addActionListener(this);
+	jrb2.addActionListener(this);
+	btn3.addActionListener(this);
+	jrb4.addActionListener(this);
+	jrb5.addActionListener(this);
+	jrb6.addActionListener(this);
+	jrb7.addActionListener(this);
+	jrb8.addActionListener(this);
+	
+
+
+	// Set the window location and size
+	setTitle("ShapeSketcher");
+	setBounds(300, 200, 700, 450);
+	setBackground(jpanel4.getBackground());// Set the window background color
+	setJMenuBar(mb);// Add the menu bar to the window
+	mb2.setBackground(Color.lightGray);
+	add(mb2,BorderLayout.SOUTH);
+	mb2.add(label);
+	point = new Vector();
+	add(jpanel1,BorderLayout.WEST);
+	add(jpanel2,BorderLayout.NORTH);
+	add(jpanel3,BorderLayout.EAST);
+	add(jpanel4,BorderLayout.CENTER);
+	jpanel1.setBackground(Color.gray);
+	jpanel2.setBackground(Color.gray);
+	jpanel3.setBackground(Color.gray);
+	jpanel4.setBackground(Color.white);
+	jpanel4.add(jl);
+	jpanel4.setLayout(null);
+	jl.setVisible(false);
+	setVisible(true);// Display window
+	
+	add(pmu);// Add the pop-up menu to the window
+	pmu.show(this, 350, 200);// Display the pop-up menu in the specified coordinates
+	pmu.setBackground(Color.gray);
+	validate();
+	}
+
+   
+    @SuppressWarnings("rawtypes")
+	public void actionPerformed(ActionEvent e) {
+		repaint();
+		if (e.getSource() == exit) {// Access to the event source
+			int result = JOptionPane.showConfirmDialog(this, "Save the changes to the unnamed?", "Drawing board",
+					JOptionPane.YES_NO_OPTION);
+			switch (result) {
+			case JOptionPane.YES_OPTION:
+				FileDialog FD2 = new FileDialog(this, "Save", FileDialog.SAVE);
+				FD2.setVisible(true);
+				try {
+					File fileout = new File(FD2.getDirectory(),FD2.getFile()+".jpg");
+					FileOutputStream fout = new FileOutputStream(fileout);
+					ObjectOutputStream oout = new ObjectOutputStream(fout);
+					oout.writeObject(point);
+					oout.close();
+				} catch (IOException IOe) {
+					int res = JOptionPane.showConfirmDialog(this, "This file cannot be saved!", "Warning",
+							JOptionPane.CANCEL_OPTION);
+					if(res==JOptionPane.CANCEL_OPTION) {
+						return;
+					}
+				}
+				break;
+			case JOptionPane.NO_OPTION:
+				System.exit(0);
+				break;
+			}
+		}else if (e.getSource() == openfile) {
+            chooser.setSelectedFile(new File("picture.dpd"));              
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("DrawPad", "dpd");
+            chooser.setFileFilter(filter);
+            int returnVal = chooser.showSaveDialog(DrawPad.this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+			    int tempflag=0;
+			    tempflag = flag;
+			    flag=0;
+			    repaint();
+				try {
+					point.removeAllElements();
+					String filein = chooser.getSelectedFile().getPath();
+					FileInputStream fin = new FileInputStream(filein);
+					ObjectInputStream oin = new ObjectInputStream(fin);
+					point = (Vector) oin.readObject();
+					oin.close();
+					repaint();
+					flag= tempflag;
+				}
+				catch (IOException e1) {
+					repaint();
+					flag = tempflag;
+					int result = JOptionPane.showConfirmDialog(this, "This file cannot be read!", "Warning",
+							JOptionPane.CANCEL_OPTION);
+					if(result==JOptionPane.CANCEL_OPTION) {
+						return;
+					}
+				} catch (ClassNotFoundException e2) {				
+					repaint();
+					flag = tempflag;
+					int result = JOptionPane.showConfirmDialog(this, "This file cannot be read!", "Warning",
+							JOptionPane.CANCEL_OPTION);
+					if(result==JOptionPane.CANCEL_OPTION) {
+						return;
+					}
+				}
+			}
+			repaint();
+		} else if (e.getSource() == save) {  
+            chooser.setSelectedFile(new File("picture.dpd"));              
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("DrawPad", "dpd");
+            chooser.setFileFilter(filter);
+            int returnVal = chooser.showSaveDialog(DrawPad.this);  
+
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+				String filesave = chooser.getSelectedFile().getPath();	
+				String[] sourceStrArray = filesave.split("\\.");				
+				if (!sourceStrArray[sourceStrArray.length-1].equals("dpd"))	filesave=filesave+".dpd";			
+				try {
+				FileOutputStream fout = new FileOutputStream(filesave);
+				ObjectOutputStream oout = new ObjectOutputStream(fout);
+				oout.writeObject(point);
+				oout.close();
+				
+            }  
+				catch (IOException IOe) {
+					int result = JOptionPane.showConfirmDialog(this, "This file cannot be read!", "Warning",
+							JOptionPane.CANCEL_OPTION);
+					if(result==JOptionPane.CANCEL_OPTION) {
+						return;
+					}
+				
+				}
+ 
+            }	
+		} else if (e.getSource() == saveas) {  
+            chooser.setSelectedFile(new File("picture.dpd"));              
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("DrawPad", "dpd");
+            chooser.setFileFilter(filter);
+            int returnVal = chooser.showSaveDialog(DrawPad.this);  
+
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+				String filesaveas = chooser.getSelectedFile().getPath();	
+				String[] sourceStrArray =filesaveas.split("\\.");				
+				if (!sourceStrArray[sourceStrArray.length-1].equals("dpd"))	filesaveas=filesaveas+".dpd";			
+				try {
+				FileOutputStream fout = new FileOutputStream(filesaveas);
+				ObjectOutputStream oout = new ObjectOutputStream(fout);
+				oout.writeObject(point);
+				oout.close();
+				
+            }  
+				catch (IOException IOe) {
+					int result = JOptionPane.showConfirmDialog(this, "This file cannot be read!", "Warning",
+							JOptionPane.CANCEL_OPTION);
+					if(result==JOptionPane.CANCEL_OPTION) {
+						return;
+					}
+				
+				}
+ 
+            }	
+		} else if (e.getSource() == coloredit) {
+			Color newColor = JColorChooser.showDialog(this, "Palette",
+					jpanel4.getBackground());
+			if (jpanel4.getBackground() != null) {
+				color=newColor;
+				jpanel4.setBackground(newColor);
+			}
+		}else if (e.getSource() == btn3) {
+			Color newColor = JColorChooser.showDialog(this, "Palette",color);
+		    color=newColor;
+		    lcolor.setForeground(newColor);
+		   // flag=1;
+		}else if (e.getSource() == about) {
+				JDialog D = new JDialog(this, "About the sketchpad");
+				((JComponent) D.getContentPane()).setOpaque(false);//Get the panel and make the background transparent so you don't hide the background
+				ImageIcon img = new ImageIcon( System.getProperty("user.dir") +"\\about.jpg");
+				JLabel background = new JLabel(img);
+				D.getLayeredPane().add(background, new Integer(Integer.MIN_VALUE));
+				background.setBounds(0, 0, img.getIconWidth(), img.getIconHeight());
+				D.setBounds(400, 250, img.getIconWidth(), img.getIconHeight());
+				D.setResizable(false);
+				D.setVisible(true);
+		}else if(e.getSource()==help){
+				try {					
+					Runtime.getRuntime().exec("cmd.exe /c start "+ DrawPad.class.getResource("/") +"help.txt");//Open help document
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(null, "Can't open the document");
+				}
+			}else if(e.getSource()==jrb1){
+				flag=1;//pencil
+			}else if(e.getSource()==jrb2){
+				flag=2;//rubber
+			}else if(e.getSource()==btn3){
+				// paint
+			}else if(e.getSource()==jrb4){
+				flag=4;//line
+			}else if(e.getSource()==jrb5){
+				flag=5;//rectangular
+			}else if(e.getSource()==jrb6){
+				flag=6;//circular
+			}else if(e.getSource()==jrb7){
+				flag=7;//ellipse
+			}else if(e.getSource()==jrb8){
+				flag=8;//Square
+			}
+		String st="";
+		if(jck9.isSelected()==true) st="(Filling)";
+			
+		switch (flag) {
+		case 1:
+			label.setText("                    Draw the line of any shape with a pixel wide");
+			break;
+		case 2:
+			label.setText("                    Use an eraser to erase part of the image");
+			break;
+		case 3:
+		    label.setText("                    Select the brush color");
+		    break;
+		case 4:
+			label.setText("                    Draw a straight line");
+			break;
+		case 5:
+			label.setText("                    Draw a rectangle"+st);
+			break;
+		case 6:
+			label.setText("                    Draw a circle"+st);
+			break;
+		case 7:
+			label.setText("                    Draw an ellipse"+st);
+			break;
+		case 8:
+			label.setText("                    Draw a square" +st);
+			break;		
+		default:
+			jl.setVisible(false);
+			label.setText("                    Welcome to use!");
+		}
+		}
+
+    class mouseA extends MouseAdapter {
+        @SuppressWarnings("unchecked")
+		public void mousePressed(MouseEvent e) {
+        	mouseDown=true;
+    		jl.setVisible(true);
+    		Point p1;
+    		switch(flag){
+    		   case 4:
+    		   case 5:
+    		   case 6:
+    		   case 7:
+    		   case 8: 		  
+    			     jlx=x = (int)e.getX();
+    			     jly=y = (int)e.getY();
+    			     p1 = new Point(x, y, flag, color,jck9.isSelected());
+    			     sp=p1;
+    			     point.addElement(p1);
+    			     break;
+    		   default :
+    		  }
+    		
+        }
+        @SuppressWarnings("unchecked")
+		public void mouseReleased(MouseEvent e) {
+        	mouseDown=false;    		
+    		jl.setVisible(false);
+    		Point p2;
+    		
+    		switch (flag) {
+    		case 1:
+    		case 2:
+    			point.addElement(mark);
+    			break;
+    		case 4:
+    		case 5:
+    		case 6:
+    		case 7:
+    		case 8:		
+    			x = (int) e.getX();
+    			y = (int) e.getY();
+    			p2 = new Point(x, y, flag, color,jck9.isSelected());			
+    			point.addElement(p2);
+    			point.addElement(mark);
+    			
+    			//repaint();
+    			break;
+    		default:
+    		}
+    		repaint();
+        }
+        public void mouseEntered(MouseEvent e) {
+        	if(jrb1.isSelected()==false &&
+        			   jrb2.isSelected()==false &&
+        			   jrb4.isSelected()==false &&
+        			   jrb5.isSelected()==false &&
+        			   jrb6.isSelected()==false &&
+        			   jrb7.isSelected()==false &&
+        			   jrb8.isSelected()==false
+        			   )
+        			{
+        				jrb1.setSelected(true);
+        				flag=1;
+        			}
+        			
+        			String st="";
+        			if(jck9.isSelected()==true) st="(Filling)";
+        				
+        			switch (flag) {
+        			case 1:
+        				label.setText("                    Draw the line of any shape with a pixel wide");
+        				break;
+        			case 2:
+        				label.setText("                    Use an eraser to erase part of the image");
+        				break;
+        			case 3:
+        			    label.setText("                    Select the brush color");
+        			    break;
+        			case 4:
+        				label.setText("                    Draw a straight line");
+        				break;
+        			case 5:
+        				label.setText("                    Draw a rectangle"+st);
+        				break;
+        			case 6:
+        				label.setText("                    Draw a circle"+st);
+        				break;
+        			case 7:
+        				label.setText("                    Draw an ellipse"+st);
+        				break;
+        			case 8:
+        				label.setText("                    Draw a square" +st);
+        				break;		
+        			default:
+        				jl.setVisible(false);
+        				label.setText("                    Welcome to use!");
+        			}
+        }
+        public void mouseExited(MouseEvent e) {
+           
+        }
+    }
+ 
+    class mouseB extends MouseMotionAdapter {
+        @SuppressWarnings("unchecked")
+		public void mouseDragged(MouseEvent e) {
+  		  Point p3 ;		  
+  		  repaint();
+  		     x = (int)e.getX();
+  		     y = (int)e.getY();
+  		     p3 = new Point(x, y, flag,color,jck9.isSelected());
+  		     cp=p3;
+  		  switch(flag){
+  		   case 1:
+  		   case 2:
+
+  		     point.addElement(p3);		    
+  		     break;
+  		  
+  		   default :
+  		  }
+  		  repaint();
+  	        jl.setBounds(e.getX()+15,e.getY()-50,100,20);
+  	        jl.setText("H:"+(e.getX()-jlx+" V:"+(e.getY()-jly)));
+        }
+        public void mouseMoved(MouseEvent e) {
+    		
+    		jl.setBounds(e.getX()+15,e.getY()-50,100,20);
+            jl.setText("H:"+(e.getX()-jlx+" V:"+(e.getY()-jly)));
+            repaint();
+    }
+       
+    }
+@SuppressWarnings("serial")
+ 
+    class DrawPanel extends JPanel {
+        public DrawPanel() {
+            setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+            setBackground(Color.white);
+            addMouseListener(new mouseA());
+            addMouseMotionListener(new mouseB());
+        }
+        @Override
+        public void paint(Graphics g) {
+    		super.paintComponents(g);
+    		Graphics2D grap = (Graphics2D) g;
+    		Point p1, p2;
+    		
+
+    		n = point.size();
+    		if (flag == 0){
+    			g.clearRect(0, 0, getSize().width, getSize().height);// remove
+    		    repaint();
+    		}
+    		
+    		
+    		
+    		for (int i = 0; i < n-1; i++) {
+    			p1 = (Point) point.elementAt(i);
+    			p2 = (Point) point.elementAt(i + 1);
+    			grap.setColor(p1.color);
+    			if (p1.tool == p2.tool) {
+    				switch (p1.tool) {
+    				case 1:// Pencil
+    					Line2D line1 = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+    					grap.draw(line1);
+    					break;
+    				case 2:// Rubber
+    					setBackground(Color.white);
+    					g.clearRect(p1.x, p1.y, 20, 20);
+    					break;
+    				case 4:// Line
+    					Line li=new Line(p1);li.setControlPoint(p2);
+    					li.setColour(p1.color);li.setFilled(p1.filled);
+    					li.draw(grap);
+    					break;
+    				case 5:// Rectangular
+    					Rectangle re=new Rectangle(p1);re.setControlPoint(p2);
+    					re.setColour(p1.color);re.setFilled(p1.filled);
+    					re.draw(grap);
+    					break;
+    				case 6:// Circular
+    					Circle ci=new Circle(p1);ci.setControlPoint(p2);
+    					ci.setColour(p1.color);ci.setFilled(p1.filled);
+    					ci.draw(grap);
+    					break;
+    				case 7:// Elliptic
+
+    					Oval ov=new Oval(p1);ov.setControlPoint(p2);
+    					ov.setColour(p1.color);ov.setFilled(p1.filled);
+    					ov.draw(grap);
+    					break;
+    				case 8:// Square
+    					Square sq=new Square(p1);sq.setControlPoint(p2);
+    					sq.setColour(p1.color);sq.setFilled(p1.filled);
+    					sq.draw(grap);
+    					break;
+    				default:
+    				}
+    			}
+    		}
+    		
+
+    		switch (sp.tool) {
+			case 4:// Line
+				Line li=new Line(sp);li.setControlPoint(cp);
+				li.setColour(Color.black);li.setFilled(sp.filled);
+				li.draw(grap);
+				break;
+
+    		case 5:// Rectangular
+    			Rectangle re=new Rectangle(sp);re.setControlPoint(cp);
+    			re.setColour(Color.black);re.setFilled(sp.filled);
+    			re.draw(grap);
+    			break;
+    		case 6:// Circular
+    			Circle ci=new Circle(sp);ci.setControlPoint(cp);
+    			ci.setColour(Color.black);ci.setFilled(sp.filled);
+    			ci.draw(grap);
+    			break;
+    		case 7:// Elliptic
+
+    			Oval ov=new Oval(sp);ov.setControlPoint(cp);
+    			ov.setColour(Color.black);ov.setFilled(sp.filled);
+    			ov.draw(grap);
+    			break;
+    		case 8:// Square
+    			Square sq=new Square(sp);sq.setControlPoint(cp);
+    			sq.setColour(Color.black);sq.setFilled(sp.filled);
+    			sq.draw(grap);
+    			break;
+    		default:
+    		}
+    		
+    		if(sp.tool>4&& sp.tool<9 &&mouseDown==true){
+    			Dotted do1=new Dotted(sp);do1.setControlPoint(cp);
+    			do1.setColour(Color.blue);do1.setFilled(sp.filled);
+    			do1.draw(grap);
+
+    			
+    		}
+    		
+    	}
+       
+   	 public void update(Graphics g)
+   	 {
+   	  paint(g);
+   	 }
+   	 }
+   
+    public static void main(String args[]) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+        }
+        DrawPad newPad = new DrawPad();
+        newPad.addWindowListener(
+                new WindowAdapter() {
+                    public void windowClosing(WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+    }
+
+    }
+
+
+@SuppressWarnings("serial")
+class Point implements Serializable
+{
+
+  int x,y;
+  Color color;
+  int tool;
+  boolean filled;
+
+ Point(int x, int y, int tool, Color color,boolean filled)
+ {
+  this.x = x;
+  this.y = y;
+  this.color = color;
+  this.tool = tool;
+  this.filled=filled;
+  }
+ public void setX(int x){this.x=x;}
+ public void setY(int y){this.y=y;}
+ public void setColor(Color color){this.color = color;};
+ public void setFilled(boolean filled){this.filled=filled;}
+ 
+}
+
+
+
+
+abstract class  Shape  {
+	 Point sp;
+	 Point cp;
+	 Color colour;
+	public Shape(){};
+	public Shape(Point startPoint){this.sp=startPoint;}
+	public Color getColour(){return colour;}
+	public void setColour(Color colour){this.colour=colour;}
+	public void setControlPoint(Point controlPoint){this.cp=controlPoint;}
+	public abstract void draw(Graphics g);
+	public String toString(){	return "H:"+(cp.x-sp.x+" V:"+(cp.y-sp.y));}
+	
+}
+
+interface  EnclosesRegion{
+	void setFilled(boolean filled);
+}
+
+class Dotted extends Shape  implements EnclosesRegion{
+	boolean filled;
+	Dotted(Point sp){this.sp=sp;}
+	public void setFilled(boolean filled){this.filled=false;}	
+	public void draw(Graphics g){
+		Graphics2D grap = (Graphics2D) g;
+		grap.setColor(colour);
+		
+		int x1=sp.x,
+			y1=sp.y,
+			x2=cp.x,
+			y2=cp.y;
+		
+		double slope;
+		if(x2==x1) x2=x2+1;
+		slope=(y2-y1)/(x2-x1)*1.0;
+		int diff=x2-x1;
+		if(x1<x2){
+			for(int i=0;i<diff;i++,i++){
+			
+			Line2D line2 = new Line2D.Double(x1+i,y1+slope*i,x1+i,y1+slope*i);
+			grap.draw(line2);
+			}
+			}
+			else if(x1>x2){
+			for(int i=0;i>diff;i--,i--){
+			
+				Line2D line2 = new Line2D.Double(x1+i,y1+slope*i,x1+i,y1+slope*i);
+				grap.draw(line2);
+			}
+			}
+			else{
+			int temp=y2-y1;
+			if(temp>0){
+			for(int i=0;i<temp;i++,i++){
+			
+				Line2D line2 = new Line2D.Double(x1+i,y1+slope*i,x1+i,y1+slope*i);
+				grap.draw(line2);
+			}
+			}else{
+			for(int i=0;i>temp;i--,i--){
+			
+				Line2D line2 = new Line2D.Double(x1+i,y1+slope*i,x1+i,y1+slope*i);
+				grap.draw(line2);
+			}
+			}
+			}
+
+		
+		
+   	  	 
+	}
+	
+}
+class Line extends Shape  implements EnclosesRegion{
+	boolean filled;
+	Line(Point sp){this.sp=sp;}
+	public void setFilled(boolean filled){this.filled=false;}	
+	public void draw(Graphics g){
+		Graphics2D grap = (Graphics2D) g;
+
+		grap.setColor(colour);
+		Line2D line2 = new Line2D.Double(sp.x, sp.y, cp.x, cp.y);
+		grap.draw(line2);
+		
+   	  	 
+	}
+}
+
+class Oval extends Shape  implements EnclosesRegion{
+	boolean filled;
+	Oval(Point sp){this.sp=sp;}
+	public void setFilled(boolean filled){this.filled=filled;}	
+	public void draw(Graphics g){
+    int w,h;
+    int l=0,t=0;
+    w=Math.abs(cp.x - sp.x)*2;
+    h=Math.abs(cp.y - sp.y)*2;
+    if (sp.x<=cp.x&&sp.y<=cp.y){    	l=cp.x-2*Math.abs(cp.x - sp.x);    	t=cp.y-2*Math.abs(cp.y - sp.y);    }
+    if (sp.x>=cp.x&&sp.y>=cp.y){    	l=cp.x;    	t=cp.y;    }
+    if (sp.x>=cp.x&&sp.y<=cp.y){    	l=cp.x;    	t=cp.y-2*Math.abs(cp.y - sp.y);    }
+    if (sp.x<=cp.x&&sp.y>=cp.y){    	l=cp.x-2*Math.abs(cp.x - sp.x);    	t=cp.y;    }
+    if (filled==true)			g.fillOval(l,t,w,h);		else		g.drawOval(l,t,w,h);	  	 
+	}
+}
+
+class Circle extends Shape  implements EnclosesRegion{
+	boolean filled;
+	Circle(Point sp){this.sp=sp;}
+	public void setFilled(boolean filled){this.filled=filled;}	
+	public void draw(Graphics g){
+		    int r;
+		    int l,t;
+		    l=0;t=0;
+		    r=Math.abs(cp.x - sp.x);
+		    l=sp.x-r;t=sp.y-r;		    
+			if (filled==true) g.fillOval(l,t,2*r,2*r);		else		g.drawOval(l,t,2*r,2*r);
+		   	
+		   	  	 
+			}
+}
+
+class Rectangle extends Shape  implements EnclosesRegion{
+	boolean filled;
+	Rectangle(Point sp){this.sp=sp;}
+	public void setFilled(boolean filled){this.filled=filled;}	
+	public void draw(Graphics g){
+		int l,t,w,h;
+		l=t=w=h=0;
+		w=Math.abs( cp.x-sp.x);	h=Math.abs( cp.y-sp.y);
+		l=cp.x<=sp.x ?  cp.x :  sp.x;t=cp.y<=sp.y ?  cp.y :  sp.y;
+		if (filled==true) g.fillRect(l, t,w,h); else g.drawRect(l, t,w,h);
+	}
+}
+class Square extends Shape  implements EnclosesRegion{
+	boolean filled;
+	Square(Point sp){this.sp=sp;}
+	public void setFilled(boolean filled){this.filled=filled;}	
+	public void draw(Graphics g){
+		int l,t,w;
+		l=t=w=0;
+		w=Math.abs( cp.x-sp.x);	
+		
+		l=cp.x<=sp.x ?  cp.x :  sp.x;t=cp.y<=sp.y ?  cp.y :  sp.y;
+		if(cp.y<sp.y) {t=sp.y-w;};
+		if (filled==true) g.fillRect(l, t,w,w); else g.drawRect(l, t,w,w);
+   	 
+   	  	 
+	}
+}
+
+
+
+class JpgFileFilter extends FileFilter {  
+    public String getDescription() {  
+        return "*.dpd";  
+    }  
+ 
+    public boolean accept(File file) {  
+        String name = file.getName();  
+        return name.toLowerCase().endsWith(".dpd");  
+    }  
+}  
