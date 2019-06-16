@@ -1,0 +1,35 @@
+Option Explicit
+Private Declare Function GetDesktopWindow Lib "user32" () As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hwnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
+Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+
+Private Const GW_CHILD = 5
+Private Const GW_HWNDNEXT = 2
+ 
+Private Function getprocessname() As Long
+Dim lngDeskTopHandle As Long
+  Dim lngHand As Long
+  Dim strName As String * 255
+  Dim a As Long
+  lngDeskTopHandle = GetDesktopWindow()
+  lngHand = GetWindow(lngDeskTopHandle, GW_CHILD)
+  Do While lngHand <> 0
+     GetWindowText lngHand, strName, Len(strName)
+     lngHand = GetWindow(lngHand, GW_HWNDNEXT)
+     If Left$(strName, 1) <> vbNullChar Then
+        If InStr(strName, "请不要关闭窗口") Then
+            a = FindWindow(vbNullString, CStr(strName)) '此处a即所需句柄，您可以在此处中断并获取该句柄，或将句柄数据写入数组以获取所有包含"123"的窗口句柄
+        End If
+     End If
+     If a Then
+     getprocessname = a
+     Exit Function
+     End If
+  Loop
+  getprocessname = 0
+End Function
+
+Private Sub Command1_Click()
+Me.Caption = getprocessname
+End Sub
