@@ -1,1 +1,25 @@
 
+def F(v,u,b):
+	v.pop(u)
+	v=v+[b]  # v.append([b]) 
+	return v
+def FF(v,b):
+	v=v+[b]
+
+x=[2,3,5]
+x=F(x,2,3)+x
+print(x)
+
+
+
+
+def F(v,u,b):
+	v.pop(u)
+  v.append([b]) 	#v=v+[b]
+	return v
+def FF(v,b):
+	v=v+[b]
+
+x=[2,3,5]
+x=F(x,2,3)+x
+print(x)
