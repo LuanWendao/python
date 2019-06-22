@@ -1,0 +1,395 @@
+学号，姓名，四门课程 学生管理系统 C 语言版本
+ （用单链表作存储结构）
+（1）编写一个简单的学生信息管理程序，实现对学生信息的简单管理。
+（2）具体要求：建立一个10个学生的信息登记表，每个学生的信息包括学号，姓名，和4门课程的成绩（C语言，英语、体育，信息管理）。要求运行程序时显示一个简单的菜单，分别进行信息维护，总分统计，总分排序，查询等操作。
+①信息维护：对学生的信息进行输入、删除、修改。
+②总分统计：对每个学生的课程统计总分。
+③总分排序：对学生的总分按照降序排序并显示出来。
+④查询：输入学生的学号，显示该学生的有关信息。
+
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+#define Max 20
+struct List /*节点结构声明*/
+{
+ int Number;
+ char Name[Max];
+ int Clanguage;
+ int English;
+ int PE;
+ int IM;
+
+ struct List *next;
+};
+typedef struct List Node;
+ typedef Node *Link;
+struct student /*结构体数组声明*/
+{
+ int Number_;
+char Name_[Max];
+ int Clanguage_;
+ int English_;
+ int PE_;
+ int IM_;
+
+}student[10]={{0,"Alan",85,90,98,93},{1,"Danie",76,70,80,74},{2,"Helen",95,98,96,95},{3,"Bill",65,60,80,70},{4,"Peter",79,65,86,79}};
+int M=5; /*初始学生总数*/
+
+ /*释放链表*/
+void Free_List(Link Head)
+{
+ Link Pointer;
+ while(Head!=NULL)
+ {
+ Pointer=Head;
+ Head=Head->next;/*消掉下一个节点*/
+ free(Pointer);
+}
+}
+ /*建立链表*/
+Link Create_List(Link Head)
+{
+ Link New;
+ Link Pointer;
+ int i;
+ Head=(Link)malloc(sizeof(Node));/*内存配置*/
+if(Head==NULL)
+ printf("allocate failure!\n");/*配置失败*/
+ else
+ {
+Head->Number=student[0].Number_; /*初始化*/
+strcpy(Head->Name,student[0].Name_);
+Head->Clanguage=student[0].Clanguage_;
+Head->English=student[0].English_;
+Head->PE=student[0].PE_;
+Head->IM=student[0].IM_;
+ Head->next=NULL;
+Pointer=Head;
+for(i=1;i<10;i++)
+{
+ New=(Link)malloc(sizeof(Node));
+ New->Number=student[i].Number_;
+ strcpy(New->Name,student[i].Name_);
+ New->Clanguage=student[i].Clanguage_;
+ New->English=student[i].English_;
+New->PE=student[i].PE_;
+ New->IM=student[i].IM_;
+ New->next=NULL;
+ Pointer->next=New;
+ Pointer=New;
+}
+ }
+return Head;
+}
+
+ /*查询成绩*/
+Link List_Search(int Key,Link Head)
+{
+ Link Pointer;
+ Pointer=Head;
+ while(Pointer!=NULL)
+ {
+ if(Pointer->Number==Key)
+{
+ printf("your Number is:%d\n",Pointer->Number);
+ printf("your Name is:%s\n",Pointer->Name);
+ printf("your Clanguage is:%d\n",Pointer->Clanguage);
+printf("your English is:%d\n",Pointer->English);
+ printf("your PE is:%d\n",Pointer->PE);
+printf("your IM is:%d\n",Pointer->IM);
+
+}
+ Pointer=Pointer->next;
+}
+return Head;
+}
+
+ /*修改成绩*/
+Link List_Modify(char *s,int Key,Link Head)
+{
+Link Pointer;
+ int newscore1,newscore2,newscore3,newscore4;
+ Pointer=Head;
+ while(Pointer!=NULL)
+ {
+ if(Pointer->Number==Key)
+ {
+ if(strcmp(s,"Clanguage")==0)
+ {
+ printf("**please input new score:");
+scanf("%d",&newscore1);
+ student[Key].Clanguage_=newscore1;
+break;
+ }
+else if(strcmp(s,"English")==0)
+ {
+printf("**please input new score:");
+ scanf("%d",&newscore2);
+ student[Key].English_=newscore2;
+break;
+ }
+else if(strcmp(s,"PE")==0)
+ {
+ printf("**please input new score:");
+ scanf("%d",&newscore3);
+ student[Key].PE_=newscore3;
+ break;
+ }
+ else if(strcmp(s,"IM")==0)
+ {
+ printf("**please input new score:");
+ scanf("%d",&newscore4);
+ student[Key].IM_=newscore4;
+break;
+ }
+
+ Pointer=Pointer->next;
+ }
+ }
+ return Head;
+}
+
+
+/*删除某人的成绩*/
+Link Delete_List(int Key,Link Head)
+{
+ Link Pointer;
+ Link Back;
+ Pointer=Head;
+ while(1)
+ {
+ if(Pointer->next==NULL)
+ {
+ printf("Not Found!\n");
+ break;
+}
+ if(Head->Number==Key)
+ {
+ Head=Pointer->next;
+ free(Pointer);
+ break;
+ }
+ Back=Pointer;
+ Pointer=Pointer->next;
+ if(Pointer->Number==Key)
+ {
+ Back->next=Pointer->next;
+free(Pointer);
+ break;
+ }
+}
+return Head;
+}
+/*插入某人的成绩*/
+Link Insert_List(int Key,Link Head,Link New)
+{
+ Link Pointer;
+ Pointer=Head;
+ while(1)
+ {
+ if(Pointer==NULL)
+ {
+ New->next=Head;
+ Head=New;
+ break;
+}
+if(Pointer->Number==Key)
+{
+ New->next=Pointer->next;
+ Pointer->next=New;
+ break;
+ }
+
+
+ Pointer=Pointer->next;
+ }
+ return Head;
+}
+
+ /*求某人总分*/
+int total(int Key,Link Head)
+{
+ Link Pointer;
+ int total_;
+ Pointer=Head;
+while(Pointer!=NULL)
+{
+ {
+ if(Pointer->Number==Key)
+ total_=Pointer->Clanguage+Pointer->English+Pointer->PE+Pointer->IM;
+}
+ Pointer=Pointer->next;
+ }
+ return total_;
+}
+
+ /*求某人平均分*/
+float average(int Key,Link Head)
+{
+ float average_;
+ average_=total(Key,Head)/4.0;
+ return average_;
+}
+
+/*求全体平均分*/
+
+float Average(int M,Link Head)
+{
+ int Key;
+ float Average_=0.0;
+ for(Key=0;Key<M;Key++)
+{
+ Average_+=total(Key,Head)/M;
+ }
+ return Average_;
+}
+
+ /*某人排名*/
+int paiming(int Key,int M,Link Head)
+{
+ int i,j,k,c;
+ int a[10]={0};
+ c=total(Key,Head);
+ for(i=0;i<M;i++)
+{
+a[i]=total(i,Head);
+ }
+ j=M;
+for(k=0;k<M;k++)
+ {
+ if(c>a[k])
+ j--;
+ }
+ return j;
+}
+
+
+/*主函数*/
+void main()
+{
+ Link Head;
+ Link New;
+ int selection,total_,Key1,paiming_;
+ int Index1,Index2,Index3,Index4,Index5,Index6;
+float average_,Average_;
+char *subject;
+while(1) /*用户菜单*/
+ {
+ printf("=========================\n");
+ printf("==Simple student score management system==\n");
+printf("==1.Search student score==\n");
+ printf("==2.Modify student score==\n");
+ printf("==3.Delete student score==\n");
+ printf("==4.Insert student score==\n");
+ printf("==5.The total score of someone==\n");
+ printf("==6.The average score of someone==\n");
+ printf("==7.paiming ==\n");
+ printf("==8.The average of class==\n");
+ printf("==9.Quit ==\n");
+ printf("=========================\n");
+ printf("Please input your choose:");
+ scanf("%d",&selection); /*度取用户选项*/
+ Head=Create_List(Head);
+ if(Head!=NULL)
+ {
+ switch(selection)
+ {
+ case 1:
+
+ printf("**Please input the student number:");
+ scanf("%d",&Index1);
+ Head=List_Search(Index1,Head);/*调用List_Search函数*/
+Free_List(Head);/*调用Free_List函数*/
+break;
+
+ case 2:
+
+ printf("**Please input the student number:");
+ scanf("%d",&Index2);
+ printf("Which subject do you want to Modify:");
+ scanf("%s",subject);
+ Head=List_Modify(subject,Index2,Head);/*调用List_Modify函数*/
+ Free_List(Head); /*调用Free_List函数*/
+ break;
+
+case 3:
+
+printf("While number do you want to delete:");
+ scanf("%d",&Index3);
+ Head=Delete_List(Index3,Head);/*调用Delete_List函数*/
+ Free_List(Head); /*调用Free_List函数*/
+ student[Index3].Number_=-1;/*置删除学生学号不存在*/
+ strcpy(student[Index3].Name_," ");/*名字为空*/
+ student[Index3].Clanguage_=0; /*分数为0*/
+ student[Index3].English_=0;
+ student[Index3].PE_=0;
+student[Index3].IM_=0;
+
+ M--; /*删除后人数减1*/
+break;
+
+ case 4:
+
+ New=(Link)malloc(sizeof(Node)); /*内存配置*/
+ printf("**Please input the student number:");
+ scanf("%d",&New->Number);
+ printf("Please input student name:");
+ scanf("%s",New->Name);
+ printf("Please input the score of Clanguage ,English ,PE,IM:");
+scanf("%d %d %d %d %d",&New->Clanguage,&New->English,&New->PE,&New->IM);
+printf("Please input the number for Insert:");
+ scanf("%d",&Key1);
+ Head=Insert_List(Key1,Head,New); /*调用Insert_List函数*/
+ Free_List(Head); /*调用Free_List函数*/
+ student[Key1].Number_=New->Number;
+ strcpy(student[Key1].Name_,New->Name);
+student[Key1].Clanguage_=New->Clanguage;
+ student[Key1].English_=New->English;
+ student[Key1].PE_=New->PE;
+ student[Key1].IM_=New->IM;
+
+ M++; /*插入后人数加1*/
+ break;
+
+ case 5:
+ printf("**Please input the student number:");
+ scanf("%d",&Index4);
+total_=total(Index4,Head); /*调用total函数*/
+ Free_List(Head); /*调用Free_List函数*/
+printf("the total of the student is:%d",total_);
+ break;
+
+ case 6:
+
+printf("**Please input the student number:");
+ scanf("%d",&Index5);
+ average_=average(Index5,Head); /*调用average函数*/
+ Free_List(Head);/*调用Free_List函数*/
+ printf("the average of the student is:%f",average_);
+ break;
+
+case 7:
+
+ printf("**Please input the student number:");
+ scanf("%d",&Index6);
+ paiming_=paiming(Index6,M,Head); /*调用paiming函数*/
+ Free_List(Head); /*调用Free_List函数*/
+ printf("the paiming of the student is:%d",paiming_);
+ break;
+
+ case 8:
+
+ Average_=Average(M,Head);/*调用Average函数*/
+ Free_List(Head); /*调用Free_List函数*/
+ printf("the average of the whole class is:%f",Average_);
+ break;
+
+ case 9:
+ exit(1);/*退出用户菜单*/
+ break;
+}
+ }
+}
+}
+
