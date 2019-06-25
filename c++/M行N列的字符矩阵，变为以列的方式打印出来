@@ -1,0 +1,54 @@
+M行N列的字符矩阵，变为以列的方式打印出来
+Please enter M*N(6*5) characters:
+uiuiu
+45454
+nnmmb
+zxcvb
+ooooo
+pqpqp
+
+
+1====u4nzop
+
+2====i5nxoq
+
+3====u4mcop
+
+4====i5mvoq
+
+5====u4bbop
+
+//M行N列的字符矩阵，变为以列的方式打印出来
+#include <stdio.h>
+#include <stdlib.h>
+#define M 6
+#define N 5
+char ch[M][N];
+void function();
+
+int main()
+{
+	function();
+system("pause");
+return 0;
+}
+void function(){
+	
+	char chr[M+1];
+	char a;
+
+	int i,j;
+	printf("\nPlease enter M*N(%d*%d) characters:\n",M,N);
+	for( i=0;i<M;i++)
+		for( j=0;j<N;j++){
+			ch[i][j]='\n';
+			while(ch[i][j]=='\n')	ch[i][j]=getchar();
+		}
+	printf("\n");
+	for( i=0;i<N;i++){		
+		for( j=0;j<M;j++)chr[j]=ch[j][i];
+		chr[M]='\0';
+		printf("\n%d====%s\n",i+1,chr);
+	}
+printf("\n\n");
+}
