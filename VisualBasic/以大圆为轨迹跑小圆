@@ -1,0 +1,26 @@
+Option Explicit
+Const PI = 3.1415926
+Const angle = PI / 180#
+Dim C1x, C1y, C1r As Long
+
+Private Sub Form_Load()
+C1x = 5000
+C1y = C1x
+C1r = 4000
+End Sub
+
+Private Sub Timer1_Timer()
+Dim x, y As Long
+
+Static moveAngle As Long
+moveAngle = moveAngle + 1
+
+x = Sin(angle * moveAngle) * C1r + C1x
+y = Cos(angle * moveAngle) * C1r + C1y
+
+Pic1.PSet (x, y), vbRed
+
+Shape1.Left = x - 500
+Shape1.Top = y - 500
+Pic1.Circle (C1x, C1y), C1r, vbBlack
+End Sub
