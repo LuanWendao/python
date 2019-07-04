@@ -1,0 +1,26 @@
+Option Explicit
+
+Private Sub Command1_Click()
+Dim Arr
+Dim i, j
+Dim temp
+Arr = Array(8, 6, 2, 3, 1, 5, 7, 4)
+
+For i = 1 To UBound(Arr)
+  temp = i
+    For j = i + 1 To UBound(Arr)
+    If Arr(temp) > Arr(j) Then temp = j
+    Next j
+    
+    If temp <> i Then
+    j = Arr(i)
+    Arr(i) = Arr(temp)
+    Arr(temp) = j
+    End If
+Next i
+
+For i = 1 To UBound(Arr)
+Print Arr(i)
+Next
+
+End Sub
