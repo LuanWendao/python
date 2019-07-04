@@ -1,0 +1,22 @@
+VB 提取计算机C盘序列号
+ 
+ Private Declare Function GetVolumeInformation Lib "kernel32.dll" Alias _
+    "GetVolumeInformationA" (ByVal lpRootPathName As String, _
+    ByVal lpVolumeNameBuffer As String, ByVal nVolumeNameSize As Integer, _
+    lpVolumeSerialNumber As Long, lpMaximumComponentLength As Long, _
+    lpFileSystemFlags As Long, ByVal lpFileSystemNameBuffer As String, _
+    ByVal nFileSystemNameSize As Long) As Long
+
+ Private Sub Form_Load()
+'KPD-Team 1998
+Dim Serial As Long, Vname As String, FSName As String
+'Create buffers
+Vname = String$(255, Chr$(0))
+FSName = String$(255, Chr$(0))
+'Get the volume information
+GetVolumeInformation "C:\", Vname, 255, Serial, 0, 0, FSName, 255
+'Strip the extra chr$(0)'s
+Vname = Left$(Vname, InStr(1, Vname, Chr$(0)) - 1)
+FSName = Left$(FSName, InStr(1, FSName, Chr$(0)) - 1)
+MsgBox "The Volume name of C:\ is '" + Vname + "', the File system name of C:\ is '" + FSName + "' and the serial number of C:\ is '" + Trim(Str$(Serial)) + "'", vbInformation + vbOKOnly, App.Title
+End Sub
