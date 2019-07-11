@@ -1,0 +1,35 @@
+
+ class ArraySort:
+	def __init__(self,ls):
+		self.ls=[]
+		for i in ls:
+			self.ls.append(i)
+
+	def findbignumber(self):
+		biggest=0
+		for i in range(len(self.ls)-1):
+			if self.ls[biggest]<self.ls[i+1]:
+				biggest=i+1
+		return biggest
+
+	def sort_array(self,F=False):
+		"""参数F值为Ture是升序，F值为False是降序"""
+		sortedarray=[]
+		if not F:
+			while len(self.ls)!=0:
+				biggestnumber=self.findbignumber()
+				sortedarray.append(self.ls.pop(biggestnumber))
+			return sortedarray
+		else:
+			while len(self.ls)!=0:
+				biggestnumber=self.findbignumber()
+				sortedarray.insert(0,self.ls.pop(biggestnumber))
+			return sortedarray
+
+
+ls=[2,5,3,8,45,98,12,54,23,45,0]
+sortedarray=ArraySort(ls)
+print(sortedarray.sort_array(True))
+
+sortedarray1=ArraySort(ls)
+print(sortedarray1.sort_array())
